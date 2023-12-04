@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { auth } from './firebase-confi'
 import { createUserWithEmailAndPassword,
          signInWithEmailAndPassword,
@@ -15,10 +15,17 @@ function App() {
 
 
   /// currently login user / local
-  const [userQ, setUserQ] = useState ({})
-  onAuthStateChanged(auth, (currentUser) => {
-    setUserQ(currentUser)
-  })
+  const [userQ, setUser] = useState();
+
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+  
+    return () => unsubscribe(); // Cleanup the subscription on component unmount
+
+  }, [])
 
   const logout   = async () => {await signOut(auth)};
 
@@ -28,7 +35,7 @@ function App() {
                                };
 
   const login = async () => {try
-                            {const user = await signInWithEmailAndPassword(auth, registerEmail, registerPassword);   console.log(user)}
+                            {const user = await signInWithEmailAndPassword(auth, loginEmail, loginPassword);   console.log(user)}
                             catch(error){ console.log(error.message); } 
                             };
   
@@ -65,7 +72,7 @@ function App() {
             placeholder="Password..."
             onChange={(event) => {setLoginPassword(event.target.value)}}
           />
-          <button onClick={loginEmail} > Login</button>
+          <button onClick={login} > Login</button>
     </div>
 
     <h4> User Logged In: </h4>
